@@ -4,11 +4,11 @@
   "private": true,
   "main": "src/index.ts",
   "scripts": {
-    "db:push": "dotenv -e ../../.env -- drizzle-kit push:pg",
-    "db:generate": "dotenv -e ../../.env -- drizzle-kit generate",
-    "db:studio": "dotenv -e ../../.env -- drizzle-kit studio",
-    "seed": "dotenv -e ../../.env -- tsx src/seed.ts",
-    "test": "dotenv -e ../../.env -- vitest run"
+    "db:push": "npx dotenv-cli -e ../../.env -- drizzle-kit push:pg",
+    "db:generate": "npx dotenv-cli -e ../../.env -- drizzle-kit generate",
+    "db:studio": "npx dotenv-cli -e ../../.env -- drizzle-kit studio",
+    "seed": "npx dotenv-cli -e ../../.env -- tsx src/seed.ts",
+    "test": "npx dotenv-cli -e ../../.env -- vitest run"
   },
   "dependencies": {
     "drizzle-orm": "^0.30.0",
