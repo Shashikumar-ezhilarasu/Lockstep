@@ -55,4 +55,6 @@ export const api = {
   getDlq: () => fetchWithAuth(`/dlq`),
   requeueDlq: (dlqId: string) => fetchWithAuth(`/dlq/${dlqId}/requeue`, { method: 'POST' }),
   deleteDlq: (dlqId: string) => fetchWithAuth(`/dlq/${dlqId}`, { method: 'DELETE' }),
+  getJobLogs: (jobId: string) => fetchWithAuth(`/jobs/${jobId}/logs`),
+  retryJob: (jobId: string) => fetchWithAuth(`/jobs/${jobId}/retry`, { method: 'POST' }),
 };

@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { api } from '@/lib/api';
 import { Play, Pause, Plus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,10 +29,11 @@ function CreateJobModal({ queueId, onClose }: { queueId: string, onClose: () => 
       const payload: Record<string, unknown> = { type, payload: { handler, ms: parseInt(ms, 10) } };
       if (type === 'delayed') payload.delay_ms = 5000;
       await api.createJob(queueId, payload);
+      toast.success('Job created successfully!');
       onClose();
     } catch (err) {
       console.error(err);
-      alert('Failed to create job');
+      toast.error('Failed to create job');
     }
   };
 
@@ -177,12 +179,17 @@ export default function QueuesPage() {
 
   const handleToggle = async (queueId: string, currentStatus: string) => {
     try {
-      if (currentStatus === 'active') await api.pauseQueue(queueId);
-      else await api.resumeQueue(queueId);
+      if (currentStatus === 'active') {
+        await api.pauseQueue(queueId);
+        toast.success('Queue paused');
+      } else {
+        await api.resumeQueue(queueId);
+        toast.success('Queue activated');
+      }
       fetchQueues();
     } catch (e) {
       console.error(e);
-      alert('Failed to toggle queue. Is the backend running?');
+      toast.error('Failed to toggle queue');
     }
   };
 

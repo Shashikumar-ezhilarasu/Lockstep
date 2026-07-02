@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { RotateCw, Trash2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
 
 type DlqItem = {
   id: string;
@@ -31,15 +32,21 @@ export default function DLQPage() {
   const requeueMutation = useMutation({
     mutationFn: (id: string) => api.requeueDlq(id),
     onMutate: (id) => setRequeuing(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dlq'] }),
-    onError: () => alert('Failed to requeue job.'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dlq'] });
+      toast.success('Job requeued successfully!');
+    },
+    onError: () => toast.error('Failed to requeue job.'),
     onSettled: () => setRequeuing(null),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteDlq(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dlq'] }),
-    onError: () => alert('Failed to delete DLQ entry.'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dlq'] });
+      toast.success('DLQ entry deleted.');
+    },
+    onError: () => toast.error('Failed to delete DLQ entry.'),
   });
 
   const handleRequeue = (dlqId: string) => requeueMutation.mutate(dlqId);
