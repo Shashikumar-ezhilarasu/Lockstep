@@ -3,8 +3,7 @@ import { db } from '../src/db';
 import { schema } from 'db';
 import { claimJobs } from '../src/claim';
 import { v4 as uuidv4 } from 'uuid';
-import { eq } from 'drizzle-orm';
-
+import { eq, sql } from 'drizzle-orm';
 describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
   let orgId: string;
   let projectId: string;
@@ -119,5 +118,51 @@ describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
     
     // Should have claimed from both queues
     expect(totalClaimed).toBeGreaterThanOrEqual(2);
+  });
+
+  it('strictly enforces concurrency_limit under high concurrent load (advisory lock test)', async () => {
+    // 1. Create a queue with strict concurrency limit of 5
+    const [strictQueue] = await db.insert(schema.queues).values({ 
+      projectId, 
+      name: 'Strict Concurrency Queue', 
+      concurrencyLimit: 5 
+    }).returning();
+
+    // 2. Insert 20 queued jobs into this queue
+    const jobs = Array.from({ length: 20 }).map(() => ({
+      queueId: strictQueue.id, 
+      type: 'immediate' as const, 
+      status: 'queued' as const, 
+      payload: {}
+    }));
+    await db.insert(schema.jobs).values(jobs);
+
+    // 3. Fire 10 concurrent claimJobs calls, each requesting up to 5 slots
+    const testWorkers = Array.from({ length: 10 }).map(() => uuidv4());
+    for (const w of testWorkers) {
+      await db.insert(schema.workers).values({ 
+        id: w, hostname: 'load-test', status: 'idle', capacity: 5, subscribedQueues: [strictQueue.id] 
+      });
+    }
+
+    const promises = testWorkers.map(workerId => claimJobs(strictQueue.id, workerId, 5));
+    const results = await Promise.all(promises);
+    console.log("Claim results:", results.map(r => r.length));
+
+    const allClaimedJobs = results.flat();
+
+    // Verification 1: The total number of claimed jobs must be exactly min(20, 5) = 5
+    expect(allClaimedJobs.length).toBe(5);
+
+    // Verification 2: Total number of jobs with status IN ('claimed', 'running') is <= 5
+    const activeJobsInDb = await db.select().from(schema.jobs).where(
+      sql`${schema.jobs.queueId} = ${strictQueue.id} AND ${schema.jobs.status} IN ('claimed', 'running')`
+    );
+    expect(activeJobsInDb.length).toBeLessThanOrEqual(5);
+
+    // Verification 3: No double claims (every job ID is unique)
+    const claimedIds = allClaimedJobs.map(j => j.id);
+    const uniqueIds = new Set(claimedIds);
+    expect(uniqueIds.size).toBe(allClaimedJobs.length);
   });
 });

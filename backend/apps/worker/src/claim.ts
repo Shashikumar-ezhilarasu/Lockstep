@@ -6,7 +6,10 @@ export async function claimJobs(queueId: string, workerId: string, availableSlot
   if (availableSlots <= 0) return [];
 
   const result = await db.execute(sql`
-    WITH queue_capacity AS (
+    WITH lock_acquired AS (
+      SELECT pg_advisory_xact_lock(('x' || substr(md5(${queueId}::text), 1, 8))::bit(32)::int)
+    ),
+    queue_capacity AS (
       SELECT GREATEST(
         queues.concurrency_limit - (
           SELECT COUNT(*)
@@ -17,6 +20,7 @@ export async function claimJobs(queueId: string, workerId: string, availableSlot
         0
       ) AS remaining
       FROM queues
+      CROSS JOIN lock_acquired
       WHERE queues.id = ${queueId}
         AND queues.status = 'active'
     ),
