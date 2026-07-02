@@ -1,0 +1,23 @@
+{
+  "name": "scheduler",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- ts-node src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@types/pg": "^8.20.0",
+    "cron-parser": "^4.9.0",
+    "db": "workspace:*",
+    "drizzle-orm": "^0.30.0",
+    "pg": "^8.22.0",
+    "pino": "^8.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "pino-pretty": "^10.3.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4"
+  }
+}
