@@ -31,6 +31,11 @@ export async function claimJobs(queueId: string, workerId: string, availableSlot
         AND queues.status = 'active'
         AND (jobs.status = 'queued' OR jobs.status = 'scheduled')
         AND jobs.scheduled_at <= now()
+        AND NOT EXISTS (
+          SELECT 1 FROM job_dependencies jd
+          JOIN jobs dep ON dep.id = jd.depends_on_job_id
+          WHERE jd.job_id = jobs.id AND dep.status != 'completed'
+        )
       ORDER BY jobs.priority DESC, jobs.scheduled_at ASC
       FOR UPDATE OF jobs SKIP LOCKED
       LIMIT LEAST(${availableSlots}, COALESCE((SELECT remaining FROM queue_capacity), 0))
