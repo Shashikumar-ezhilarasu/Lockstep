@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# testing & logs
+coverage/
+*.log
+e2e_results.log
+
+# build outputs
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# env files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db

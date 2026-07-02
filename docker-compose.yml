@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  db-test:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: scheduler_test
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+
+volumes:
+  pgdata-test:
