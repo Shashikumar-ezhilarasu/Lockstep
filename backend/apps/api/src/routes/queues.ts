@@ -4,6 +4,7 @@ import { schema } from 'db';
 import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { assertValidTransition } from 'db';
+import { checkProjectAccess, checkQueueAccess } from '../authz';
 
 const CreateQueueSchema = z.object({
   name: z.string().min(1),
@@ -22,10 +23,11 @@ export default async function queueRoutes(app: FastifyInstance) {
   app.post('/projects/:projectId/queues', async (request: any, reply) => {
     const { projectId } = request.params;
     try {
-      const data = CreateQueueSchema.parse(request.body);
+      if (!(await checkProjectAccess(projectId, request.user.id))) {
+        return reply.code(403).send({ error: 'Forbidden: You do not have access to this project.' });
+      }
 
-      // (We skip rigorous org-membership checks here for brevity in the assignment,
-      // but they should check if user has access to projectId)
+      const data = CreateQueueSchema.parse(request.body);
 
       const [queue] = await db.insert(schema.queues).values({
         projectId,
@@ -56,6 +58,10 @@ export default async function queueRoutes(app: FastifyInstance) {
 
   app.get('/projects/:projectId/queues', async (request: any, reply) => {
     const { projectId } = request.params;
+    if (!(await checkProjectAccess(projectId, request.user.id))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have access to this project.' });
+    }
+
     const queues = await db.select()
       .from(schema.queues)
       .where(eq(schema.queues.projectId, projectId))
@@ -66,6 +72,9 @@ export default async function queueRoutes(app: FastifyInstance) {
 
   app.get('/queues/:queueId/stats', async (request: any, reply) => {
     const { queueId } = request.params;
+    if (!(await checkQueueAccess(queueId, request.user.id))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have access to this queue.' });
+    }
     
     const [queueExists] = await db.select({ id: schema.queues.id }).from(schema.queues).where(eq(schema.queues.id, queueId));
     if (!queueExists) return reply.code(404).send({ error: 'Queue not found' });
@@ -89,6 +98,10 @@ export default async function queueRoutes(app: FastifyInstance) {
 
   app.post('/queues/:queueId/pause', async (request: any, reply) => {
     const { queueId } = request.params;
+    if (!(await checkQueueAccess(queueId, request.user.id, 'admin'))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have admin access to this queue.' });
+    }
+
     const [queue] = await db.update(schema.queues).set({ status: 'paused' }).where(eq(schema.queues.id, queueId)).returning();
     if (!queue) return reply.code(404).send({ error: 'Queue not found' });
     return reply.send({ data: queue });
@@ -96,6 +109,10 @@ export default async function queueRoutes(app: FastifyInstance) {
 
   app.post('/queues/:queueId/resume', async (request: any, reply) => {
     const { queueId } = request.params;
+    if (!(await checkQueueAccess(queueId, request.user.id, 'admin'))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have admin access to this queue.' });
+    }
+
     const [queue] = await db.update(schema.queues).set({ status: 'active' }).where(eq(schema.queues.id, queueId)).returning();
     if (!queue) return reply.code(404).send({ error: 'Queue not found' });
     return reply.send({ data: queue });
@@ -103,6 +120,10 @@ export default async function queueRoutes(app: FastifyInstance) {
 
   app.get('/queues/:queueId', async (request: any, reply) => {
     const { queueId } = request.params;
+    if (!(await checkQueueAccess(queueId, request.user.id))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have access to this queue.' });
+    }
+
     const [queue] = await db.select().from(schema.queues).where(eq(schema.queues.id, queueId));
     if (!queue) return reply.code(404).send({ error: 'Queue not found' });
     return reply.send({ data: queue });
@@ -110,6 +131,9 @@ export default async function queueRoutes(app: FastifyInstance) {
 
   app.get('/queues/:queueId/dlq', async (request: any, reply) => {
     const { queueId } = request.params;
+    if (!(await checkQueueAccess(queueId, request.user.id))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have access to this queue.' });
+    }
     
     // Find all DLQ rows for this queue (by joining with jobs)
     const dlqJobs = await db.select({
@@ -129,21 +153,25 @@ export default async function queueRoutes(app: FastifyInstance) {
   app.post('/dlq/:dlqId/requeue', async (request: any, reply) => {
     const { dlqId } = request.params;
     
-    // 1. Find the DLQ entry
+    // 1. Find the DLQ entry and check access
     const [dlqEntry] = await db.select().from(schema.deadLetterQueue).where(eq(schema.deadLetterQueue.id, dlqId));
     if (!dlqEntry) return reply.code(404).send({ error: 'DLQ entry not found' });
 
+    const [job] = await db.select({ queueId: schema.jobs.queueId }).from(schema.jobs).where(eq(schema.jobs.id, dlqEntry.jobId));
+    if (!job) return reply.code(404).send({ error: 'Job not found' });
+
+    if (!(await checkQueueAccess(job.queueId, request.user.id))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have access to this queue.' });
+    }
+
     // 2 & 3. Requeue and delete in a transaction
     await db.transaction(async (tx) => {
-      const [job] = await tx.select().from(schema.jobs).where(eq(schema.jobs.id, dlqEntry.jobId));
-      if (job) {
-        assertValidTransition(job.status, 'queued');
-        await tx.update(schema.jobs).set({
-          status: 'queued',
-          attempt: 0,
-          scheduledAt: new Date(),
-        }).where(eq(schema.jobs.id, dlqEntry.jobId));
-      }
+      await tx.update(schema.jobs).set({
+        status: 'queued',
+        attempt: 0,
+        scheduledAt: new Date(),
+      }).where(eq(schema.jobs.id, dlqEntry.jobId));
+      
       await tx.delete(schema.deadLetterQueue).where(eq(schema.deadLetterQueue.id, dlqId));
     });
 
@@ -152,11 +180,31 @@ export default async function queueRoutes(app: FastifyInstance) {
 
   app.delete('/dlq/:dlqId', async (request: any, reply) => {
     const { dlqId } = request.params;
+    
+    const [dlqEntry] = await db.select().from(schema.deadLetterQueue).where(eq(schema.deadLetterQueue.id, dlqId));
+    if (!dlqEntry) return reply.code(404).send({ error: 'DLQ entry not found' });
+
+    const [job] = await db.select({ queueId: schema.jobs.queueId }).from(schema.jobs).where(eq(schema.jobs.id, dlqEntry.jobId));
+    if (!job) return reply.code(404).send({ error: 'Job not found' });
+
+    if (!(await checkQueueAccess(job.queueId, request.user.id))) {
+      return reply.code(403).send({ error: 'Forbidden: You do not have access to this queue.' });
+    }
+
     await db.delete(schema.deadLetterQueue).where(eq(schema.deadLetterQueue.id, dlqId));
     return reply.send({ data: { deleted: true } });
   });
 
   app.get('/dlq', async (request: any, reply) => {
+    const userOrgs = await db.select({ orgId: schema.orgMembers.orgId })
+      .from(schema.orgMembers)
+      .where(eq(schema.orgMembers.userId, request.user.id));
+    
+    const orgIds = userOrgs.map(o => o.orgId);
+    if (orgIds.length === 0) {
+      return reply.send({ data: [] });
+    }
+
     const dlqJobs = await db.select({
       id: schema.deadLetterQueue.id,
       jobId: schema.deadLetterQueue.jobId,
@@ -164,7 +212,13 @@ export default async function queueRoutes(app: FastifyInstance) {
       attemptsMade: schema.deadLetterQueue.attemptsMade,
       originalPayload: schema.deadLetterQueue.originalPayload,
       movedAt: schema.deadLetterQueue.movedAt,
-    }).from(schema.deadLetterQueue).orderBy(sql`${schema.deadLetterQueue.movedAt} DESC`);
+    }).from(schema.deadLetterQueue)
+      .innerJoin(schema.jobs, eq(schema.deadLetterQueue.jobId, schema.jobs.id))
+      .innerJoin(schema.queues, eq(schema.jobs.queueId, schema.queues.id))
+      .innerJoin(schema.projects, eq(schema.queues.projectId, schema.projects.id))
+      .where(sql`${schema.projects.orgId} = ANY(${orgIds})`)
+      .orderBy(sql`${schema.deadLetterQueue.movedAt} DESC`);
+
     return reply.send({ data: dlqJobs });
   });
 }

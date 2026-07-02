@@ -45,7 +45,10 @@ export const orgMembers = pgTable(
     orgId: uuid('org_id')
       .notNull()
       .references(() => organizations.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id').notNull(), // References auth.users in Supabase
+    // userId is validated at the application layer against Supabase auth on every 
+    // insert (via JWT verification), not via a Postgres FK. Cross-schema FKs to 
+    // auth.users are discouraged by Supabase docs.
+    userId: uuid('user_id').notNull(), 
     role: text('role').notNull().default('member'), // owner, admin, member
   },
   (table) => ({
@@ -62,7 +65,7 @@ export const projects = pgTable('projects', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const queues = pgTable('queues', {
+export const queues: any = pgTable('queues', {
   id: uuid('id').defaultRandom().primaryKey(),
   projectId: uuid('project_id')
     .notNull()
@@ -71,16 +74,16 @@ export const queues = pgTable('queues', {
   priority: integer('priority').default(10).notNull(),
   concurrencyLimit: integer('concurrency_limit').default(10).notNull(),
   status: queueStatusEnum('status').default('active').notNull(),
-  defaultRetryPolicyId: uuid('default_retry_policy_id'), // Self-reference, resolved later
+  defaultRetryPolicyId: uuid('default_retry_policy_id').references(() => (retryPolicies as any).id, { onDelete: 'set null' }) as any, // Self-reference
   totalJobs: integer('total_jobs').default(0).notNull(),
   failedJobs: integer('failed_jobs').default(0).notNull(),
   completedJobs: integer('completed_jobs').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const retryPolicies = pgTable('retry_policies', {
+export const retryPolicies: any = pgTable('retry_policies', {
   id: uuid('id').defaultRandom().primaryKey(),
-  queueId: uuid('queue_id').references(() => queues.id, { onDelete: 'cascade' }),
+  queueId: uuid('queue_id').references(() => (queues as any).id, { onDelete: 'cascade' }) as any,
   strategy: retryStrategyEnum('strategy').notNull(),
   baseDelayMs: integer('base_delay_ms').notNull(),
   maxDelayMs: integer('max_delay_ms'),
@@ -97,9 +100,12 @@ export const workers = pgTable('workers', {
   subscribedQueues: uuid('subscribed_queues').array(),
   version: text('version'),
   startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
-});
+},
+(table) => ({
+  hostnameIdx: uniqueIndex('idx_workers_hostname').on(table.hostname),
+}));
 
-export const jobs = pgTable(
+export const jobs: any = pgTable(
   'jobs',
   {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -107,7 +113,7 @@ export const jobs = pgTable(
       .notNull()
       .references(() => queues.id, { onDelete: 'cascade' }),
     retryPolicyId: uuid('retry_policy_id').references(() => retryPolicies.id, { onDelete: 'set null' }),
-    parentJobId: uuid('parent_job_id'), // Self-referential for DAGs
+    parentJobId: uuid('parent_job_id').references(() => (jobs as any).id, { onDelete: 'set null' }) as any, // Self-referential for DAGs
     type: jobTypeEnum('type').notNull(),
     status: jobStatusEnum('status').default('queued').notNull(),
     priority: integer('priority').default(10).notNull(),

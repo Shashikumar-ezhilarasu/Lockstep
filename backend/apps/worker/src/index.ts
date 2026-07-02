@@ -193,7 +193,17 @@ async function start() {
     status: 'idle' as const,
     capacity: CONCURRENCY,
     subscribedQueues: QUEUES_TO_POLL,
-  }).returning();
+  })
+  .onConflictDoUpdate({
+    target: schema.workers.hostname,
+    set: { 
+      status: 'idle',
+      startedAt: new Date(),
+      capacity: CONCURRENCY,
+      subscribedQueues: QUEUES_TO_POLL,
+    }
+  })
+  .returning();
   
   workerDbId = worker.id;
 
