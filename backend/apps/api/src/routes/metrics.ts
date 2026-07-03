@@ -16,6 +16,7 @@ export default async function metricsRoutes(app: FastifyInstance) {
       .where(eq(schema.orgMembers.userId, request.user.id));
     
     const orgIds = userOrgs.map(o => o.orgId);
+    const orgIdsRaw = orgIds.length > 0 ? orgIds.map(id => `'${id}'`).join(',') : "''";
     if (orgIds.length === 0) {
       return reply.send({
         data: {
@@ -40,7 +41,7 @@ export default async function metricsRoutes(app: FastifyInstance) {
       INNER JOIN queues q ON j.queue_id = q.id
       INNER JOIN projects p ON q.project_id = p.id
       WHERE je.finished_at > NOW() - INTERVAL '1 hour'
-        AND p.org_id = ANY(${orgIds})
+        AND p.org_id IN (${sql.raw(orgIdsRaw)})
       GROUP BY 1
       ORDER BY 1 ASC
       LIMIT 15
@@ -57,16 +58,14 @@ export default async function metricsRoutes(app: FastifyInstance) {
       INNER JOIN queues q ON j.queue_id = q.id
       INNER JOIN projects p ON q.project_id = p.id
       WHERE je.finished_at > NOW() - INTERVAL '1 hour'
-        AND p.org_id = ANY(${orgIds})
+        AND p.org_id IN (${sql.raw(orgIdsRaw)})
     `);
 
-    // 3. Workers (filtered by orgIds)
+    // 3. Workers (global, not tied to project_id since workers poll multiple queues)
     const workersResult = await db.execute(sql`
       SELECT COUNT(*) as active_workers 
       FROM workers w
-      INNER JOIN projects p ON w.project_id = p.id
       WHERE w.status != 'offline'
-        AND p.org_id = ANY(${orgIds})
     `);
 
     // 4. DLQ Count (filtered by orgIds)
@@ -76,7 +75,7 @@ export default async function metricsRoutes(app: FastifyInstance) {
       INNER JOIN jobs j ON dlq.job_id = j.id
       INNER JOIN queues q ON j.queue_id = q.id
       INNER JOIN projects p ON q.project_id = p.id
-      WHERE p.org_id = ANY(${orgIds})
+      WHERE p.org_id IN (${sql.raw(orgIdsRaw)})
     `);
 
     const chartRows = rows(chartDataResult);
