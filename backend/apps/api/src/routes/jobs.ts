@@ -173,6 +173,7 @@ export default async function jobRoutes(app: FastifyInstance) {
   app.get('/jobs', async (request: any, reply) => {
     const query = z.object({
       queue_id: z.string().uuid().optional(),
+      worker_id: z.string().uuid().optional(),
       status: z.string().optional(),
       limit: z.coerce.number().int().min(1).max(100).default(50),
       offset: z.coerce.number().int().min(0).default(0),
@@ -195,6 +196,7 @@ export default async function jobRoutes(app: FastifyInstance) {
 
     const conditions = [
       query.queue_id ? eq((schema.jobs as any).queueId, query.queue_id) : undefined,
+      query.worker_id ? eq((schema.jobs as any).claimedBy, query.worker_id) : undefined,
       query.status ? eq((schema.jobs as any).status, query.status as any) : undefined,
     ].filter(Boolean) as any[];
 

@@ -6,6 +6,7 @@ import { RotateCw, Trash2, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
+import Link from 'next/link';
 
 type DlqItem = {
   id: string;
@@ -80,7 +81,9 @@ export default function DLQPage() {
                     <AlertTriangle size={24} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white font-mono">Job ID: {item.jobId}</h3>
+                    <h3 className="font-semibold text-white font-mono">
+                      Job ID: <Link href={`/jobs?job_id=${item.jobId}`} className="text-indigo-400 hover:text-indigo-300 transition-colors underline decoration-indigo-500/30 underline-offset-4">{item.jobId}</Link>
+                    </h3>
                     <p className="text-rose-400 text-sm mt-1 font-medium bg-rose-500/10 inline-block px-2 py-1 rounded">{item.failureReason}</p>
                     <div className="flex gap-4 mt-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
                       <p>Attempts: <span className="text-white">{item.attemptsMade}</span></p>

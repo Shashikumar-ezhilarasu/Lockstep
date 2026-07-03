@@ -1,9 +1,11 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ChevronLeft, RotateCcw, Ban, FileText, Calendar, Shield, Cpu, RefreshCw } from 'lucide-react';
+import Link from 'next/link';
 import JobLifecycleDiagram, { type JobLifecycleStatus } from '@/components/JobLifecycleDiagram';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
@@ -28,7 +30,14 @@ type LogRow = {
   message: string;
 };
 
-export default function JobsPage() {
+function JobsContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const initialQueue = searchParams.get('queue');
+  const initialWorker = searchParams.get('worker');
+  const initialJobId = searchParams.get('job_id');
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [logs, setLogs] = useState<LogRow[]>([]);
@@ -41,11 +50,21 @@ export default function JobsPage() {
 
   const fetchJobs = async () => {
     setIsRefreshing(true);
-    const { data } = await supabase.from('jobs').select('*, queues(name)').order('created_at', { ascending: false }).limit(50);
+    let query = supabase.from('jobs').select('*, queues(name)').order('created_at', { ascending: false }).limit(50);
+    
+    if (initialQueue) query = query.eq('queue_id', initialQueue);
+    if (initialWorker) query = query.eq('claimed_by', initialWorker);
+    if (initialJobId) query = query.eq('id', initialJobId);
+    
+    const { data } = await query;
     if (data) {
       const nextJobs = data as Job[];
       setJobs(nextJobs);
-      setSelectedJob((current) => current ? nextJobs.find((job) => job.id === current.id) ?? current : current);
+      if (initialJobId && !selectedJob) {
+        setSelectedJob(nextJobs.find((job) => job.id === initialJobId) || null);
+      } else {
+        setSelectedJob((current) => current ? nextJobs.find((job) => job.id === current.id) ?? current : current);
+      }
     }
     setIsRefreshing(false);
   };
@@ -57,7 +76,7 @@ export default function JobsPage() {
       .subscribe();
 
     return () => { supabase.removeChannel(sub); };
-  }, []);
+  }, [initialQueue, initialWorker, initialJobId]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -135,7 +154,10 @@ export default function JobsPage() {
             className="space-y-6"
           >
             <button 
-              onClick={() => setSelectedJob(null)} 
+              onClick={() => {
+                setSelectedJob(null);
+                // Return to previous filter if we came from one
+              }} 
               className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
             >
               <ChevronLeft size={20} /> Back to List
@@ -148,7 +170,7 @@ export default function JobsPage() {
                     Job {selectedJob.id}
                   </h3>
                   <p className="text-slate-400 mt-1">
-                    Queue: <span className="text-indigo-300 font-medium">{selectedJob.queues?.name || 'Unknown'}</span> | Type: <span className="capitalize">{selectedJob.type}</span> | Attempts: <span className="font-semibold text-slate-200">{selectedJob.attempt}</span>
+                    Queue: <Link href={`/queues`} className="text-indigo-300 hover:text-indigo-200 font-medium">{selectedJob.queues?.name || selectedJob.queue_id || 'Unknown'}</Link> | Type: <span className="capitalize">{selectedJob.type}</span> | Attempts: <span className="font-semibold text-slate-200">{selectedJob.attempt}</span>
                   </p>
                 </div>
                 
@@ -334,5 +356,13 @@ export default function JobsPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-white">Loading jobs...</div>}>
+      <JobsContent />
+    </Suspense>
   );
 }
