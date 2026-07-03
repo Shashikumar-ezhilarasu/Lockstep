@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { schema } from 'db';
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, sql, inArray } from 'drizzle-orm';
 import { db } from '../db';
 import { assertValidTransition } from 'db';
 import { checkProjectAccess, checkQueueAccess } from '../authz';
@@ -216,7 +216,7 @@ export default async function queueRoutes(app: FastifyInstance) {
       .innerJoin(schema.jobs, eq(schema.deadLetterQueue.jobId, schema.jobs.id))
       .innerJoin(schema.queues, eq(schema.jobs.queueId, schema.queues.id))
       .innerJoin(schema.projects, eq(schema.queues.projectId, schema.projects.id))
-      .where(sql`${schema.projects.orgId} = ANY(${orgIds})`)
+      .where(inArray(schema.projects.orgId, orgIds))
       .orderBy(sql`${schema.deadLetterQueue.movedAt} DESC`);
 
     return reply.send({ data: dlqJobs });

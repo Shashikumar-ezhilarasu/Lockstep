@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { schema } from 'db';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import { db } from '../db';
 import { v4 as uuidv4 } from 'uuid';
 import parser from 'cron-parser';
@@ -136,7 +136,7 @@ export default async function jobRoutes(app: FastifyInstance) {
       .innerJoin(schema.projects, eq((schema.queues as any).projectId, (schema.projects as any).id))
       .where(and(
         eq((schema.jobs as any).batchId, batchId),
-        sql`${(schema.projects as any).orgId} = ANY(${orgIds})`
+        inArray((schema.projects as any).orgId, orgIds)
       ))
       .limit(1);
 
@@ -214,7 +214,7 @@ export default async function jobRoutes(app: FastifyInstance) {
       .innerJoin(schema.queues, eq((schema.jobs as any).queueId, (schema.queues as any).id))
       .innerJoin(schema.projects, eq((schema.queues as any).projectId, (schema.projects as any).id))
       .where(and(
-        sql`${(schema.projects as any).orgId} = ANY(${orgIds})`,
+        inArray((schema.projects as any).orgId, orgIds),
         ...conditions
       ))
       .orderBy(desc((schema.jobs as any).createdAt))
