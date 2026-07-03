@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npx dotenv-cli -e ../../.env -- ts-node src/index.ts",
+    "start": "tsx src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -12,7 +13,8 @@
     "db": "workspace:*",
     "drizzle-orm": "^0.30.0",
     "pg": "^8.22.0",
-    "pino": "^8.21.0"
+    "pino": "^8.21.0",
+    "tsx": "^4.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

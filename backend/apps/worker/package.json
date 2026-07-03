@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npx dotenv-cli -e ../../.env -- ts-node src/index.ts",
-    "start": "npx dotenv-cli -e ../../.env -- ts-node src/index.ts",
+    "start": "tsx src/index.ts",
     "test": "npx dotenv-cli -e ../../.env -- vitest run"
   },
   "dependencies": {
@@ -13,13 +13,13 @@
     "p-limit": "^5.0.0",
     "pino": "^8.19.0",
     "postgres": "^3.4.4",
+    "tsx": "^4.22.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
     "pino-pretty": "^10.3.1",
     "ts-node": "^10.9.2",
-    "tsx": "^4.22.4",
     "vitest": "^1.3.1"
   }
 }
