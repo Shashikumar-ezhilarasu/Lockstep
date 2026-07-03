@@ -60,10 +60,19 @@ async function executeJob(job: any) {
       message: 'Job execution started',
     });
 
-    const handler = handlers[job.payload?.handler];
-    if (!handler) throw new Error(`Unknown handler: ${job.payload?.handler}`);
-
-    const result = await handler(job.payload);
+    let parsedPayload: any = job.payload;
+    try {
+      if (typeof parsedPayload === 'string') parsedPayload = JSON.parse(parsedPayload);
+      if (typeof parsedPayload === 'string') parsedPayload = JSON.parse(parsedPayload);
+    } catch (e) {
+      // ignore
+    }
+    
+    const handler = handlers[parsedPayload?.handler];
+    if (!handler) {
+      throw new Error(`Unknown handler: ${parsedPayload?.handler}`);
+    } 
+    const result = await handler(parsedPayload);
 
     // Success
     assertValidTransition(job.status, 'completed');
