@@ -34,11 +34,15 @@ export async function getAuthToken() {
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const token = await getAuthToken();
-  const headers = {
-    'Content-Type': 'application/json',
+  const headers: Record<string, string> = {
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    ...options.headers,
   };
+  
+  if (options.body) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  Object.assign(headers, options.headers || {});
   
   const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
   
