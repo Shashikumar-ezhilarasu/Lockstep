@@ -23,6 +23,14 @@ export default function Home() {
     }
   });
 
+  if (!metrics) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
   const { chartData, totalCompleted, activeWorkers, failureRate, dlqCount, averageDuration } = metrics;
 
   const containerVariants: Variants = {
@@ -66,10 +74,17 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           <h3 className="text-slate-400 text-sm font-medium uppercase tracking-wider relative z-10">Active Workers</h3>
           <p className="text-5xl font-black text-white mt-3 relative z-10 tracking-tight">{activeWorkers}</p>
-          <p className="text-blue-400 text-sm mt-3 flex items-center gap-1 font-medium relative z-10">
-            <span className="flex h-2 w-2 rounded-full bg-blue-400 animate-pulse"></span>
-            All nodes healthy
-          </p>
+          {activeWorkers > 0 ? (
+            <p className="text-blue-400 text-sm mt-3 flex items-center gap-1 font-medium relative z-10">
+              <span className="flex h-2 w-2 rounded-full bg-blue-400 animate-pulse"></span>
+              All nodes healthy
+            </p>
+          ) : (
+            <p className="text-rose-400 text-sm mt-3 flex items-center gap-1 font-medium relative z-10">
+              <span className="flex h-2 w-2 rounded-full bg-rose-400 animate-pulse"></span>
+              No active workers — jobs will not be processed
+            </p>
+          )}
         </div>
         
         {/* Metric 3 */}

@@ -5,14 +5,15 @@ import { toast } from 'react-hot-toast';
 import { api } from '@/lib/api';
 import { Play, Pause, Plus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 type Queue = {
   id: string;
   name: string;
   status: string;
   priority: number;
-  concurrency_limit: number;
-  total_jobs: number;
+  concurrencyLimit: number;
+  totalJobs: number;
 };
 
 type Org = { id: string; name: string };
@@ -177,7 +178,9 @@ export default function QueuesPage() {
     };
   }, [fetchQueues]);
 
-  const handleToggle = async (queueId: string, currentStatus: string) => {
+  const handleToggle = async (e: React.MouseEvent, queueId: string, currentStatus: string) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
       if (currentStatus === 'active') {
         await api.pauseQueue(queueId);
@@ -210,39 +213,41 @@ export default function QueuesPage() {
 
       <div className="grid grid-cols-1 gap-6">
         {queues.map((q) => (
-          <div key={q.id} className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex justify-between items-center group hover:border-indigo-500/50 transition-all">
-            <div>
-              <div className="flex items-center gap-3">
-                <h3 className="text-2xl font-bold text-white">{q.name}</h3>
-                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${q.status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
-                  {q.status}
-                </span>
+          <Link key={q.id} href={`/jobs?queue=${q.id}`} className="block">
+            <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex justify-between items-center group hover:border-indigo-500/50 transition-all cursor-pointer">
+              <div>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-2xl font-bold text-white">{q.name}</h3>
+                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${q.status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
+                    {q.status}
+                  </span>
+                </div>
+                <div className="flex gap-6 mt-4 text-sm text-slate-400">
+                  <p>Priority: <span className="text-slate-200 font-mono">{q.priority}</span></p>
+                  <p>Concurrency: <span className="text-slate-200 font-mono">{q.concurrencyLimit ?? 0}</span></p>
+                  <p>Jobs Processed: <span className="text-slate-200 font-mono">{q.totalJobs ?? 0}</span></p>
+                </div>
               </div>
-              <div className="flex gap-6 mt-4 text-sm text-slate-400">
-                <p>Priority: <span className="text-slate-200 font-mono">{q.priority}</span></p>
-                <p>Concurrency: <span className="text-slate-200 font-mono">{q.concurrency_limit}</span></p>
-                <p>Jobs Processed: <span className="text-slate-200 font-mono">{q.total_jobs}</span></p>
+              <div className="flex gap-4">
+                <button 
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowModal(q.id); }}
+                  className="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 font-medium rounded-lg flex items-center gap-2 transition-colors border border-indigo-500/30"
+                >
+                  <Plus size={18} /> New Job
+                </button>
+                
+                {q.status === 'active' ? (
+                  <button onClick={(e) => handleToggle(e, q.id, q.status)} className="p-2 rounded-lg bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 transition-colors border border-slate-700">
+                    <Pause size={20} />
+                  </button>
+                ) : (
+                  <button onClick={(e) => handleToggle(e, q.id, q.status)} className="p-2 rounded-lg bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-slate-300 transition-colors border border-slate-700">
+                    <Play size={20} />
+                  </button>
+                )}
               </div>
             </div>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setShowModal(q.id)}
-                className="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 font-medium rounded-lg flex items-center gap-2 transition-colors border border-indigo-500/30"
-              >
-                <Plus size={18} /> New Job
-              </button>
-              
-              {q.status === 'active' ? (
-                <button onClick={() => handleToggle(q.id, q.status)} className="p-2 rounded-lg bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 transition-colors border border-slate-700">
-                  <Pause size={20} />
-                </button>
-              ) : (
-                <button onClick={() => handleToggle(q.id, q.status)} className="p-2 rounded-lg bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-slate-300 transition-colors border border-slate-700">
-                  <Play size={20} />
-                </button>
-              )}
-            </div>
-          </div>
+          </Link>
         ))}
         {queues.length === 0 && (
           <div className="p-12 text-center border border-dashed border-white/10 rounded-xl bg-white/5 flex flex-col items-center justify-center">
