@@ -99,6 +99,18 @@ async function recoverStaleWorkers() {
         }
       }
     }
+    
+    // Clean up offline workers older than 24h
+    const cleanupThreshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const deleteResult = await db.delete(schema.workers)
+      .where(and(
+        eq(schema.workers.status, 'offline'),
+        lte(schema.workers.startedAt, cleanupThreshold)
+      ));
+    
+    // In Drizzle, delete() returns the pg result, we can log if any were deleted
+    // logger.info('Cleaned up old offline workers');
+
   } catch (error) {
     logger.error({ error }, 'Error in recoverStaleWorkers');
   }

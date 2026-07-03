@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Server } from 'lucide-react';
+import Link from 'next/link';
 
 type Worker = {
   id: string;
@@ -14,6 +15,7 @@ type Worker = {
 
 export default function WorkersPage() {
   const [workers, setWorkers] = useState<Worker[]>([]);
+  const [hideOffline, setHideOffline] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -41,15 +43,27 @@ export default function WorkersPage() {
 
   return (
     <div className="p-8 space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight text-white">Worker Monitor</h2>
-        <p className="text-slate-400 mt-2">Real-time status of all execution nodes.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Worker Monitor</h2>
+          <p className="text-slate-400 mt-2">Real-time status of all execution nodes.</p>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer hover:text-white transition-colors">
+          <input 
+            type="checkbox" 
+            checked={hideOffline} 
+            onChange={(e) => setHideOffline(e.target.checked)} 
+            className="rounded border-slate-600 bg-slate-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
+          />
+          Hide Offline
+        </label>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {workers.map((worker) => (
-          <div key={worker.id} className="p-6 bg-slate-900 border border-slate-800 rounded-xl shadow-lg relative overflow-hidden">
-            <div className={`absolute top-0 left-0 w-1 h-full ${worker.status === 'offline' ? 'bg-slate-600' : worker.status === 'busy' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
+        {workers.filter(w => !hideOffline || w.status !== 'offline').map((worker) => (
+          <Link key={worker.id} href={`/jobs?worker=${worker.id}`} className="block">
+            <div className="p-6 bg-slate-900 border border-slate-800 rounded-xl shadow-lg relative overflow-hidden group hover:bg-slate-800/80 transition-colors cursor-pointer">
+              <div className={`absolute top-0 left-0 w-1 h-full ${worker.status === 'offline' ? 'bg-slate-600' : worker.status === 'busy' ? 'bg-blue-500' : 'bg-emerald-500'}`}></div>
             
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
@@ -79,6 +93,7 @@ export default function WorkersPage() {
               </div>
             </div>
           </div>
+          </Link>
         ))}
 
         {workers.length === 0 && (
