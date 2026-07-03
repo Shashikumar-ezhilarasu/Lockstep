@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  if (pathname === '/login') return null;
 
   const navItems = [
     { name: 'Metrics', href: '/', icon: LayoutDashboard },

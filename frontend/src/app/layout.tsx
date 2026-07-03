@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   description: "Distributed Job Scheduler Dashboard",
 };
 
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
 export default function RootLayout({
   children,
 }: Readonly<{

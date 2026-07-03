@@ -6,17 +6,30 @@ let cachedToken: string | null = null;
 
 export type JsonRecord = Record<string, unknown>;
 
+export function setAuthToken(token: string) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('lockstep_token', token);
+  }
+  cachedToken = token;
+}
+
+export function clearAuthToken() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('lockstep_token');
+  }
+  cachedToken = null;
+}
+
 export async function getAuthToken() {
   if (cachedToken) return cachedToken;
-  try {
-    const res = await fetch(`${API_URL}/auth/login`, { method: 'POST' });
-    const data = await res.json() as { token?: string };
-    cachedToken = data.token ?? null;
-    return cachedToken;
-  } catch (e) {
-    console.error('Failed to get auth token', e);
-    return null;
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('lockstep_token');
+    if (local) {
+      cachedToken = local;
+      return local;
+    }
   }
+  return null;
 }
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
@@ -28,6 +41,14 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   };
   
   const res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
+  
+  if (res.status === 401) {
+    clearAuthToken();
+    if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+  }
+  
   if (!res.ok) {
     throw new Error(`API Error: ${res.statusText}`);
   }
@@ -35,6 +56,16 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 }
 
 export const api = {
+  login: async (payload: JsonRecord) => {
+    const res = await fetch(`${API_URL}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!res.ok) throw new Error('Login failed');
+    return res.json();
+  },
+  register: async (payload: JsonRecord) => {
+    const res = await fetch(`${API_URL}/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!res.ok) throw new Error('Registration failed');
+    return res.json();
+  },
   getMetrics: () => fetchWithAuth(`/metrics`),
   getOrgs: () => fetchWithAuth(`/orgs`),
   createOrg: (payload: { name: string }) => fetchWithAuth(`/orgs`, { method: 'POST', body: JSON.stringify(payload) }),
@@ -48,6 +79,7 @@ export const api = {
   resumeQueue: (queueId: string) => fetchWithAuth(`/queues/${queueId}/resume`, { method: 'POST' }),
   
   // Job Management
+  getJobs: (filters?: Record<string, string>) => fetchWithAuth(`/jobs?${new URLSearchParams(filters || {}).toString()}`),
   createJob: (queueId: string, payload: JsonRecord) => fetchWithAuth(`/queues/${queueId}/jobs`, { method: 'POST', body: JSON.stringify(payload) }),
   cancelJob: (jobId: string) => fetchWithAuth(`/jobs/${jobId}/cancel`, { method: 'POST' }),
   
