@@ -3,7 +3,7 @@ services:
     name: lockstep-backend
     env: node
     rootDir: backend
-    buildCommand: pnpm install && pnpm run build
+    buildCommand: pnpm install
     startCommand: pnpm run start:all
     envVars:
       - key: PNPM_VERSION

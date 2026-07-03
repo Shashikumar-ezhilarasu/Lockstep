@@ -7,6 +7,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test:db": "pnpm --filter db test",
+    "build": "echo 'No build step required for backend'",
     "start:all": "concurrently \"pnpm --filter api start\" \"pnpm --filter worker start\" \"pnpm --filter scheduler start\""
   },
   "devDependencies": {
