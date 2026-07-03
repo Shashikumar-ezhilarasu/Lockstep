@@ -3,11 +3,12 @@ import { db } from '../src/db';
 import { schema } from 'db';
 import { claimJobs } from '../src/claim';
 import { v4 as uuidv4 } from 'uuid';
-import { eq, sql } from 'drizzle-orm';
+import { eq, sql, inArray } from 'drizzle-orm';
 describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
   let orgId: string;
   let projectId: string;
   let queueId: string;
+  const createdWorkerIds: string[] = [];
 
   beforeAll(async () => {
     // Setup org, project, queue
@@ -23,9 +24,16 @@ describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
 
   beforeEach(async () => {
     await db.delete(schema.jobs).where(eq(schema.jobs.queueId, queueId));
+    if (createdWorkerIds.length > 0) {
+      await db.delete(schema.workers).where(inArray(schema.workers.id, [...createdWorkerIds]));
+      createdWorkerIds.length = 0;
+    }
   });
 
   afterAll(async () => {
+    if (createdWorkerIds.length > 0) {
+      await db.delete(schema.workers).where(inArray(schema.workers.id, [...createdWorkerIds]));
+    }
     await db.delete(schema.organizations).where(eq(schema.organizations.id, orgId));
   });
 
@@ -43,7 +51,8 @@ describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
     // Simulate 5 workers trying to claim 5 jobs each simultaneously
     const workers = Array.from({ length: 5 }).map(() => uuidv4());
     for (const w of workers) {
-      await db.insert(schema.workers).values({ id: w, hostname: 'test', status: 'idle', capacity: 10, subscribedQueues: [queueId] });
+      createdWorkerIds.push(w);
+      await db.insert(schema.workers).values({ id: w, hostname: `test-${w.substring(0, 8)}`, status: 'idle', capacity: 10, subscribedQueues: [queueId] });
     }
 
     // Run claimJobs concurrently
@@ -74,7 +83,8 @@ describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
     await db.update(schema.queues).set({ status: 'paused' }).where(eq(schema.queues.id, queueId));
     
     const workerId = uuidv4();
-    await db.insert(schema.workers).values({ id: workerId, hostname: 'test', status: 'idle', capacity: 10, subscribedQueues: [queueId] });
+    createdWorkerIds.push(workerId);
+    await db.insert(schema.workers).values({ id: workerId, hostname: `test-${workerId.substring(0, 8)}`, status: 'idle', capacity: 10, subscribedQueues: [queueId] });
     const claimed = await claimJobs(queueId, workerId, 5);
     expect(claimed.length).toBe(0);
     
@@ -95,7 +105,8 @@ describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
     
     // Worker claims only up to limit (simulate 3 available slots)
     const workerId = uuidv4();
-    await db.insert(schema.workers).values({ id: workerId, hostname: 'test', status: 'idle', capacity: 10, subscribedQueues: [queueId] });
+    createdWorkerIds.push(workerId);
+    await db.insert(schema.workers).values({ id: workerId, hostname: `test-${workerId.substring(0, 8)}`, status: 'idle', capacity: 10, subscribedQueues: [queueId] });
     const claimed = await claimJobs(queueId, workerId, 3);
     expect(claimed.length).toBe(3);
   });
@@ -107,7 +118,8 @@ describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
     await db.insert(schema.jobs).values({ queueId: q2.id, type: 'immediate', status: 'queued', payload: {} });
     
     const workerId = uuidv4();
-    await db.insert(schema.workers).values({ id: workerId, hostname: 'test', status: 'idle', capacity: 10, subscribedQueues: [queueId, q2.id] });
+    createdWorkerIds.push(workerId);
+    await db.insert(schema.workers).values({ id: workerId, hostname: `test-${workerId.substring(0, 8)}`, status: 'idle', capacity: 10, subscribedQueues: [queueId, q2.id] });
     const queuesToPoll = [queueId, q2.id];
     
     let totalClaimed = 0;
@@ -140,8 +152,9 @@ describe('Job Claiming Concurrency (SKIP LOCKED)', () => {
     // 3. Fire 10 concurrent claimJobs calls, each requesting up to 5 slots
     const testWorkers = Array.from({ length: 10 }).map(() => uuidv4());
     for (const w of testWorkers) {
+      createdWorkerIds.push(w);
       await db.insert(schema.workers).values({ 
-        id: w, hostname: 'load-test', status: 'idle', capacity: 5, subscribedQueues: [strictQueue.id] 
+        id: w, hostname: `load-${w.substring(0, 8)}`, status: 'idle', capacity: 5, subscribedQueues: [strictQueue.id] 
       });
     }
 
