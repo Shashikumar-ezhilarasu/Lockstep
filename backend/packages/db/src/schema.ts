@@ -191,6 +191,8 @@ export const deadLetterQueue = pgTable('dead_letter_queue', {
   failureReason: text('failure_reason').notNull(),
   attemptsMade: integer('attempts_made').notNull(),
   originalPayload: jsonb('original_payload').notNull(),
+  aiSummary: text('ai_summary'),
+  aiSummaryStatus: text('ai_summary_status'),
   movedAt: timestamp('moved_at', { withTimezone: true }).defaultNow().notNull(),
   resolved: boolean('resolved').default(false).notNull(),
   resolvedBy: uuid('resolved_by'), // Could reference user
