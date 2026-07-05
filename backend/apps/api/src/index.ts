@@ -60,6 +60,24 @@ app.post('/auth/login', async (request: any, reply) => {
   // Fallback to random uuid if no email provided (for legacy e2e tests)
   const userId = email ? generateStableUUID(email) : uuidv4();
   
+  if (email) {
+    try {
+      const { schema } = require('db');
+      const { db } = require('./db');
+      
+      // Idempotently ensure the user has an organization
+      const existing = await db.select().from(schema.orgMembers).where(require('drizzle-orm').eq(schema.orgMembers.userId, userId));
+      if (existing.length === 0) {
+        const [org] = await db.insert(schema.organizations).values({ name: `${email.split('@')[0]}'s Org` }).returning();
+        await db.insert(schema.orgMembers).values({ orgId: org.id, userId, role: 'owner' });
+        const [project] = await db.insert(schema.projects).values({ orgId: org.id, name: 'Default Project' }).returning();
+        await db.insert(schema.queues).values({ projectId: project.id, name: 'default', concurrencyLimit: 10, priority: 5 });
+      }
+    } catch (e) {
+      request.log.error(e);
+    }
+  }
+
   const token = jwt.sign(
     { sub: userId, aud: 'authenticated', role: 'authenticated', iss: process.env.SUPABASE_URL ? `${process.env.SUPABASE_URL}/auth/v1` : 'supabase' }, 
     JWT_SECRET, { expiresIn: '1d' }
