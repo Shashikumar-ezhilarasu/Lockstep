@@ -62,12 +62,36 @@ export default async function queueRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: 'Forbidden: You do not have access to this project.' });
     }
 
-    const queues = await db.select()
-      .from(schema.queues)
-      .where(eq(schema.queues.projectId, projectId))
-      .orderBy(desc(schema.queues.createdAt));
+    const rawQueues = await db.execute(sql`
+      SELECT 
+        q.*,
+        COUNT(j.id) as real_total_jobs,
+        COUNT(CASE WHEN j.status = 'failed' OR j.status = 'dead_letter' THEN 1 END) as real_failed_jobs,
+        COUNT(CASE WHEN j.status = 'completed' THEN 1 END) as real_completed_jobs
+      FROM queues q
+      LEFT JOIN jobs j ON q.id = j.queue_id
+      WHERE q.project_id = ${projectId}
+      GROUP BY q.id
+      ORDER BY q.created_at DESC
+    `);
+    
+    // Map snake_case or raw rows to camelCase for the frontend
+    const mappedQueues = (rawQueues as any[]).map(q => ({
+      id: q.id,
+      projectId: q.project_id,
+      name: q.name,
+      status: q.status,
+      priority: q.priority,
+      concurrencyLimit: q.concurrency_limit,
+      defaultRetryPolicyId: q.default_retry_policy_id,
+      totalJobs: Number(q.real_total_jobs || 0),
+      failedJobs: Number(q.real_failed_jobs || 0),
+      completedJobs: Number(q.real_completed_jobs || 0),
+      createdAt: q.created_at,
+      updatedAt: q.updated_at
+    }));
 
-    return reply.send({ data: queues, meta: { count: queues.length } });
+    return reply.send({ data: mappedQueues, meta: { count: mappedQueues.length } });
   });
 
   app.get('/queues/:queueId/stats', async (request: any, reply) => {
