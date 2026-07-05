@@ -6,6 +6,7 @@ import { motion, type Variants } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 const STATUS_COLORS: Record<string, string> = {
   queued: '#94a3b8',
@@ -77,11 +78,16 @@ export default function Home() {
       initial="hidden"
       animate="show"
     >
-      <motion.div variants={itemVariants}>
-        <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
-          Dashboard Overview
-        </h2>
-        <p className="text-slate-500 mt-2 text-lg">Real-time metrics and system health.</p>
+      <motion.div variants={itemVariants} className="flex justify-between items-center">
+        <div>
+          <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">
+            Dashboard Overview
+          </h2>
+          <p className="text-slate-500 mt-2 text-lg">Real-time metrics and system health.</p>
+        </div>
+        <Link href="/docs" className="px-6 py-3 bg-white border border-[#E7E5E4] hover:border-[#5B4FE8] hover:text-[#5B4FE8] text-slate-700 font-bold rounded-xl flex items-center gap-2 transition-colors shadow-sm">
+          Read Docs &rarr;
+        </Link>
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
