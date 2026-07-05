@@ -27,7 +27,7 @@ export default function LoginPage() {
       
       setAuthToken(res.token);
       toast.success(isLogin ? 'Welcome back!' : 'Account created successfully!');
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       toast.error(error.message || 'Authentication failed');
     } finally {
@@ -36,11 +36,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-slate-950">
-      {/* Background elements */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-rose-600/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
-      
+    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#FAFAF9]">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -49,18 +45,17 @@ export default function LoginPage() {
         <div className="text-center mb-10">
           <motion.h1 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-            className="text-4xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 drop-shadow-sm mb-2"
+            className="text-4xl font-black tracking-tight text-slate-900 drop-shadow-sm mb-2"
           >
             LOCKSTEP
           </motion.h1>
-          <p className="text-slate-400 font-medium">Distributed Job Scheduler</p>
+          <p className="text-slate-500 font-medium">Distributed Job Scheduler</p>
         </div>
 
-        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5" />
+        <div className="bg-white border border-[#E7E5E4] rounded-3xl p-8 shadow-sm relative overflow-hidden">
           
           <form onSubmit={handleSubmit} className="relative z-10 space-y-5">
-            <h2 className="text-2xl font-bold text-white mb-6">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6">
               {isLogin ? 'Sign In' : 'Create Account'}
             </h2>
             
@@ -72,13 +67,13 @@ export default function LoginPage() {
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-2"
                 >
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Organization Name</label>
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Organization Name</label>
                   <input 
                     type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required={!isLogin}
-                    className="w-full bg-black/20 border border-white/10 focus:border-indigo-500/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 outline-none transition-all"
+                    className="w-full bg-[#FAFAF9] border border-[#E7E5E4] focus:border-[#5B4FE8] rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition-all shadow-sm"
                     placeholder="Acme Corp"
                   />
                 </motion.div>
@@ -86,25 +81,25 @@ export default function LoginPage() {
             </AnimatePresence>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
               <input 
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-black/20 border border-white/10 focus:border-indigo-500/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 outline-none transition-all"
+                className="w-full bg-[#FAFAF9] border border-[#E7E5E4] focus:border-[#5B4FE8] rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition-all shadow-sm"
                 placeholder="you@company.com"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
               <input 
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-black/20 border border-white/10 focus:border-indigo-500/50 rounded-xl px-4 py-3 text-slate-200 placeholder:text-slate-600 outline-none transition-all"
+                className="w-full bg-[#FAFAF9] border border-[#E7E5E4] focus:border-[#5B4FE8] rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition-all shadow-sm"
                 placeholder="••••••••"
               />
             </div>
@@ -112,7 +107,7 @@ export default function LoginPage() {
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none mt-4 shadow-lg shadow-indigo-500/25"
+              className="w-full py-3.5 px-4 bg-[#5B4FE8] hover:bg-[#4a3fcc] text-white rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:pointer-events-none mt-4 shadow-sm"
             >
               {loading ? 'Authenticating...' : (isLogin ? 'Sign In' : 'Sign Up')}
             </button>
@@ -122,7 +117,7 @@ export default function LoginPage() {
             <button 
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-slate-400 hover:text-white transition-colors"
+              className="text-sm text-slate-600 hover:text-slate-900 transition-colors font-medium"
             >
               {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </button>

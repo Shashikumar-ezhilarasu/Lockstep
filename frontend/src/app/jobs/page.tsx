@@ -133,14 +133,14 @@ function JobsContent() {
   });
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 bg-[#FAFAF9] min-h-screen">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-4xl font-extrabold tracking-tight text-white flex items-center gap-3">
+          <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
             Job Explorer
-            {isRefreshing && <RefreshCw className="w-5 h-5 animate-spin text-indigo-400" />}
+            {isRefreshing && <RefreshCw className="w-5 h-5 animate-spin text-[#5B4FE8]" />}
           </h2>
-          <p className="text-slate-400 mt-2">View real-time job states, logs, and lifecycles.</p>
+          <p className="text-slate-500 mt-2">View real-time job states, logs, and lifecycles.</p>
         </div>
       </div>
 
@@ -158,19 +158,19 @@ function JobsContent() {
                 setSelectedJob(null);
                 // Return to previous filter if we came from one
               }} 
-              className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+              className="flex items-center gap-2 text-[#5B4FE8] hover:text-[#4a3fcc] font-medium transition-colors"
             >
               <ChevronLeft size={20} /> Back to List
             </button>
             
-            <div className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md space-y-6">
+            <div className="p-6 bg-white border border-[#E7E5E4] rounded-2xl shadow-sm space-y-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-3 font-mono">
                     Job {selectedJob.id}
                   </h3>
-                  <p className="text-slate-400 mt-1">
-                    Queue: <Link href={`/queues`} className="text-indigo-300 hover:text-indigo-200 font-medium">{selectedJob.queues?.name || selectedJob.queue_id || 'Unknown'}</Link> | Type: <span className="capitalize">{selectedJob.type}</span> | Attempts: <span className="font-semibold text-slate-200">{selectedJob.attempt}</span>
+                  <p className="text-slate-500 mt-1">
+                    Queue: <Link href={`/queues`} className="text-[#5B4FE8] hover:text-[#4a3fcc] font-medium">{selectedJob.queues?.name || selectedJob.queue_id || 'Unknown'}</Link> | Type: <span className="capitalize">{selectedJob.type}</span> | Attempts: <span className="font-semibold text-slate-900">{selectedJob.attempt}</span>
                   </p>
                 </div>
                 
@@ -179,7 +179,7 @@ function JobsContent() {
                   {['queued', 'scheduled'].includes(selectedJob.status) && (
                     <button 
                       onClick={() => handleCancel(selectedJob.id)}
-                      className="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl font-bold flex items-center gap-2 transition-colors"
+                      className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl font-bold flex items-center gap-2 transition-colors"
                     >
                       <Ban size={16} /> Cancel Job
                     </button>
@@ -187,7 +187,7 @@ function JobsContent() {
                   {['failed', 'cancelled'].includes(selectedJob.status) && (
                     <button 
                       onClick={() => handleRetry(selectedJob.id)}
-                      className="px-4 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold flex items-center gap-2 transition-colors"
+                      className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 rounded-xl font-bold flex items-center gap-2 transition-colors"
                     >
                       <RotateCcw size={16} /> Retry Job
                     </button>
@@ -198,33 +198,33 @@ function JobsContent() {
               <JobLifecycleDiagram status={selectedJob.status} />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-xl space-y-3">
-                  <h4 className="text-slate-400 font-semibold text-sm flex items-center gap-2 uppercase tracking-wider">
-                    <Cpu size={16} className="text-indigo-400" /> Payload
+                <div className="bg-[#FAFAF9] border border-[#E7E5E4] p-5 rounded-xl space-y-3">
+                  <h4 className="text-slate-500 font-semibold text-sm flex items-center gap-2 uppercase tracking-wider">
+                    <Cpu size={16} className="text-[#5B4FE8]" /> Payload
                   </h4>
-                  <pre className="text-slate-300 font-mono text-xs overflow-x-auto p-3 bg-black/30 rounded-lg max-h-[250px]">
+                  <pre className="text-slate-700 font-mono text-xs overflow-x-auto p-3 bg-white border border-[#E7E5E4] rounded-lg max-h-[250px]">
                     {JSON.stringify(selectedJob.payload, null, 2)}
                   </pre>
                 </div>
-                <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-xl space-y-3">
-                  <h4 className="text-slate-400 font-semibold text-sm flex items-center gap-2 uppercase tracking-wider">
-                    <Calendar size={16} className="text-indigo-400" /> Lifecycle Events
+                <div className="bg-[#FAFAF9] border border-[#E7E5E4] p-5 rounded-xl space-y-3">
+                  <h4 className="text-slate-500 font-semibold text-sm flex items-center gap-2 uppercase tracking-wider">
+                    <Calendar size={16} className="text-[#5B4FE8]" /> Lifecycle Events
                   </h4>
                   <div className="space-y-3 text-sm">
-                    <p className="flex justify-between items-center py-1.5 border-b border-white/5">
+                    <p className="flex justify-between items-center py-1.5 border-b border-[#E7E5E4]/50">
                       <span className="text-slate-500">Created:</span> 
-                      <span className="text-slate-300">{new Date(selectedJob.created_at).toLocaleString()}</span>
+                      <span className="text-slate-900 font-mono">{new Date(selectedJob.created_at).toLocaleString()}</span>
                     </p>
                     {selectedJob.scheduled_at && (
-                      <p className="flex justify-between items-center py-1.5 border-b border-white/5">
+                      <p className="flex justify-between items-center py-1.5 border-b border-[#E7E5E4]/50">
                         <span className="text-slate-500">Scheduled for:</span> 
-                        <span className="text-slate-300">{new Date(selectedJob.scheduled_at).toLocaleString()}</span>
+                        <span className="text-slate-900 font-mono">{new Date(selectedJob.scheduled_at).toLocaleString()}</span>
                       </p>
                     )}
                     {selectedJob.claimed_at && (
-                      <p className="flex justify-between items-center py-1.5 border-b border-white/5">
+                      <p className="flex justify-between items-center py-1.5 border-b border-[#E7E5E4]/50">
                         <span className="text-slate-500">Claimed at:</span> 
-                        <span className="text-slate-300">{new Date(selectedJob.claimed_at).toLocaleString()}</span>
+                        <span className="text-slate-900 font-mono">{new Date(selectedJob.claimed_at).toLocaleString()}</span>
                       </p>
                     )}
                   </div>
@@ -232,24 +232,24 @@ function JobsContent() {
               </div>
 
               {/* Execution Logs Section */}
-              <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-xl space-y-4">
-                <h4 className="text-slate-400 font-semibold text-sm flex items-center gap-2 uppercase tracking-wider">
-                  <FileText size={16} className="text-indigo-400" /> Chronological Execution Logs
+              <div className="bg-[#FAFAF9] border border-[#E7E5E4] p-5 rounded-xl space-y-4">
+                <h4 className="text-slate-500 font-semibold text-sm flex items-center gap-2 uppercase tracking-wider">
+                  <FileText size={16} className="text-[#5B4FE8]" /> Chronological Execution Logs
                 </h4>
                 {logs.length === 0 ? (
                   <p className="text-slate-500 text-sm py-4 italic">No execution logs recorded yet for this job.</p>
                 ) : (
                   <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 font-mono text-xs">
                     {logs.map((log) => (
-                      <div key={log.id} className="flex items-start gap-4 p-2.5 rounded hover:bg-white/5 transition-colors border-l-2 border-slate-700">
-                        <span className="text-slate-500 shrink-0">{new Date(log.ts).toLocaleTimeString()}</span>
+                      <div key={log.id} className="flex items-start gap-4 p-2.5 rounded hover:bg-white transition-colors border-l-2 border-[#E7E5E4]">
+                        <span className="text-slate-500 shrink-0 font-mono">{new Date(log.ts).toLocaleTimeString()}</span>
                         <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold shrink-0 
-                          ${log.level === 'error' ? 'bg-rose-500/20 text-rose-400' : 
-                            log.level === 'warn' ? 'bg-amber-500/20 text-amber-400' : 
-                            'bg-slate-700/35 text-slate-300'}`}>
+                          ${log.level === 'error' ? 'bg-rose-100 text-rose-600' : 
+                            log.level === 'warn' ? 'bg-amber-100 text-amber-600' : 
+                            'bg-slate-100 text-slate-600'}`}>
                           {log.level}
                         </span>
-                        <span className="text-slate-300 break-all">{log.message}</span>
+                        <span className="text-slate-700 break-all font-mono">{log.message}</span>
                       </div>
                     ))}
                   </div>
@@ -266,13 +266,13 @@ function JobsContent() {
             className="space-y-4"
           >
             {/* Filters Bar */}
-            <div className="flex flex-wrap items-center gap-4 bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-md">
+            <div className="flex flex-wrap items-center gap-4 bg-white border border-[#E7E5E4] shadow-sm p-4 rounded-xl">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status:</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Status:</span>
                 <select 
                   value={statusFilter} 
                   onChange={e => setStatusFilter(e.target.value)} 
-                  className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-[#5B4FE8]"
                 >
                   <option value="all">All States</option>
                   <option value="queued">Queued</option>
@@ -286,11 +286,11 @@ function JobsContent() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Queue:</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Queue:</span>
                 <select 
                   value={queueFilter} 
                   onChange={e => setQueueFilter(e.target.value)} 
-                  className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-[#5B4FE8]"
                 >
                   <option value="all">All Queues</option>
                   {uniqueQueueNames.map(name => (
@@ -299,15 +299,15 @@ function JobsContent() {
                 </select>
               </div>
 
-              <div className="ml-auto text-xs text-slate-400 font-medium">
-                Showing <span className="text-indigo-400 font-bold">{filteredJobs.length}</span> of {jobs.length} jobs
+              <div className="ml-auto text-xs text-slate-500 font-medium">
+                Showing <span className="text-[#5B4FE8] font-bold">{filteredJobs.length}</span> of {jobs.length} jobs
               </div>
             </div>
 
             {/* Jobs List Table */}
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden">
+            <div className="bg-white border border-[#E7E5E4] shadow-sm rounded-xl overflow-hidden">
               <table className="w-full text-left text-sm">
-                <thead className="bg-white/5 border-b border-white/10 text-slate-400">
+                <thead className="bg-[#FAFAF9] border-b border-[#E7E5E4] text-slate-500">
                   <tr>
                     <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Job ID</th>
                     <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Queue</th>
@@ -315,7 +315,7 @@ function JobsContent() {
                     <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Age</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[#E7E5E4]">
                   {filteredJobs.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="px-6 py-10 text-center text-slate-500 italic">
@@ -327,19 +327,18 @@ function JobsContent() {
                       <tr 
                         key={job.id} 
                         onClick={() => setSelectedJob(job)} 
-                        className="hover:bg-white/5 transition-colors cursor-pointer group"
+                        className="hover:bg-[#FAFAF9] transition-colors cursor-pointer group"
                       >
-                        <td className="px-6 py-4 font-mono text-xs text-indigo-300 group-hover:text-indigo-200">
+                        <td className="px-6 py-4 font-mono text-xs text-[#5B4FE8] font-medium group-hover:text-[#4a3fcc]">
                           {job.id}
                         </td>
-                        <td className="px-6 py-4 text-slate-200">{job.queues?.name || 'Unknown'}</td>
+                        <td className="px-6 py-4 text-slate-900">{job.queues?.name || 'Unknown'}</td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full 
-                            ${job.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 
-                              job.status === 'failed' || job.status === 'dead_letter' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 
-                              job.status === 'running' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 
-                              job.status === 'claimed' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' :
-                              'bg-slate-500/20 text-slate-400 border border-slate-500/30'}`}>
+                            ${job.status === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 
+                              job.status === 'failed' || job.status === 'dead_letter' ? 'bg-rose-100 text-rose-700 border border-rose-200' : 
+                              job.status === 'running' || job.status === 'claimed' ? 'bg-indigo-100 text-indigo-700 border border-indigo-200' : 
+                              'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                             {job.status}
                           </span>
                         </td>
@@ -361,7 +360,7 @@ function JobsContent() {
 
 export default function JobsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-white">Loading jobs...</div>}>
+    <Suspense fallback={<div className="p-8 text-slate-500">Loading jobs...</div>}>
       <JobsContent />
     </Suspense>
   );

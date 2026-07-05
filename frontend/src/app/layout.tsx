@@ -21,17 +21,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} bg-slate-950 text-slate-50 flex h-screen overflow-hidden relative`}>
-        {/* Abstract background blobs */}
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-900/20 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-rose-900/10 blur-[120px] pointer-events-none" />
-        
+    <html lang="en" className="light">
+      <body className={`${inter.className} bg-[#FAFAF9] text-slate-900 flex h-screen overflow-hidden relative selection:bg-indigo-100 selection:text-indigo-900`}>
         <Providers>
           <Toaster 
             position="top-right"
             toastOptions={{
-              className: 'bg-slate-900 text-slate-100 border border-slate-800',
+              className: 'bg-white text-slate-900 border border-[#E7E5E4] shadow-sm',
               duration: 4000,
             }}
           />

@@ -39,39 +39,39 @@ function CreateJobModal({ queueId, onClose }: { queueId: string, onClose: () => 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 flex items-center justify-center">
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }} 
         animate={{ scale: 1, opacity: 1 }} 
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+        className="bg-white border border-[#E7E5E4] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
       >
-        <div className="flex justify-between items-center p-6 border-b border-slate-800">
-          <h3 className="text-xl font-bold text-white">Create New Job</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white"><X size={20} /></button>
+        <div className="flex justify-between items-center p-6 border-b border-[#E7E5E4]">
+          <h3 className="text-xl font-bold text-slate-900">Create New Job</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-900"><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Job Type</label>
-            <select value={type} onChange={e => setType(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Job Type</label>
+            <select value={type} onChange={e => setType(e.target.value)} className="w-full bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg p-2.5 text-slate-900 outline-none focus:border-[#5B4FE8]">
               <option value="immediate">Immediate</option>
               <option value="delayed">Delayed (5s)</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Handler Function</label>
-            <select value={handler} onChange={e => setHandler(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+            <label className="block text-sm font-medium text-slate-700 mb-1">Handler Function</label>
+            <select value={handler} onChange={e => setHandler(e.target.value)} className="w-full bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg p-2.5 text-slate-900 outline-none focus:border-[#5B4FE8]">
               <option value="sleep_simulate">Simulate Work (Sleep)</option>
               <option value="fail_simulate">Simulate Failure</option>
             </select>
           </div>
           {handler === 'sleep_simulate' && (
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Execution Time (ms)</label>
-              <input type="number" value={ms} onChange={e => setMs(e.target.value)} className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200" />
+              <label className="block text-sm font-medium text-slate-700 mb-1">Execution Time (ms)</label>
+              <input type="number" value={ms} onChange={e => setMs(e.target.value)} className="w-full bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg p-2.5 text-slate-900 outline-none focus:border-[#5B4FE8]" />
             </div>
           )}
-          <button type="submit" className="w-full mt-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg transition-colors">
+          <button type="submit" className="w-full mt-4 bg-[#5B4FE8] hover:bg-[#4a3fcc] text-white font-semibold py-3 rounded-lg transition-colors shadow-sm">
             Dispatch Job
           </button>
         </form>
@@ -107,27 +107,27 @@ function CreateQueueModal({ projectId, onClose, onCreated }: { projectId: string
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 flex items-center justify-center">
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }} 
         animate={{ scale: 1, opacity: 1 }} 
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+        className="bg-white border border-[#E7E5E4] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
       >
-        <div className="flex justify-between items-center p-6 border-b border-slate-800">
-          <h3 className="text-xl font-bold text-white">Create New Queue</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white"><X size={20} /></button>
+        <div className="flex justify-between items-center p-6 border-b border-[#E7E5E4]">
+          <h3 className="text-xl font-bold text-slate-900">Create New Queue</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-900"><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Queue Name</label>
-            <input type="text" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200" placeholder="e.g. email-sending" />
+            <label className="block text-sm font-medium text-slate-700 mb-1">Queue Name</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg p-2.5 text-slate-900 outline-none focus:border-[#5B4FE8]" placeholder="e.g. email-sending" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1">Priority</label>
-            <input type="number" value={priority} onChange={e => setPriority(e.target.value)} required min="1" max="100" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200" />
+            <label className="block text-sm font-medium text-slate-700 mb-1">Priority</label>
+            <input type="number" value={priority} onChange={e => setPriority(e.target.value)} required min="1" max="100" className="w-full bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg p-2.5 text-slate-900 outline-none focus:border-[#5B4FE8]" />
           </div>
-          <button type="submit" className="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg transition-colors">
+          <button type="submit" className="w-full mt-4 bg-[#5B4FE8] hover:bg-[#4a3fcc] text-white font-semibold py-3 rounded-lg transition-colors shadow-sm">
             Create Queue
           </button>
         </form>
@@ -197,15 +197,15 @@ export default function QueuesPage() {
   };
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-8 bg-[#FAFAF9] min-h-screen">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-4xl font-extrabold tracking-tight text-white">Queue Management</h2>
-          <p className="text-slate-400 mt-2">Monitor, pause, and dispatch jobs to queues.</p>
+          <h2 className="text-4xl font-extrabold tracking-tight text-slate-900">Queue Management</h2>
+          <p className="text-slate-500 mt-2">Monitor, pause, and dispatch jobs to queues.</p>
         </div>
         <button 
           onClick={() => setShowCreateQueue(true)}
-          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl flex items-center gap-2 transition-colors shadow-lg shadow-indigo-500/20"
+          className="px-6 py-3 bg-[#5B4FE8] hover:bg-[#4a3fcc] text-white font-bold rounded-xl flex items-center gap-2 transition-colors shadow-sm"
         >
           <Plus size={20} /> Create Queue
         </button>
@@ -214,34 +214,34 @@ export default function QueuesPage() {
       <div className="grid grid-cols-1 gap-6">
         {queues.map((q) => (
           <Link key={q.id} href={`/jobs?queue=${q.id}`} className="block">
-            <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg flex justify-between items-center group hover:border-indigo-500/50 transition-all cursor-pointer">
+            <div className="p-6 bg-white border border-[#E7E5E4] rounded-xl shadow-sm flex justify-between items-center group hover:border-[#5B4FE8]/30 hover:shadow-md transition-all cursor-pointer">
               <div>
                 <div className="flex items-center gap-3">
-                  <h3 className="text-2xl font-bold text-white">{q.name}</h3>
-                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${q.status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
+                  <h3 className="text-2xl font-bold text-slate-900">{q.name}</h3>
+                  <span className={`px-3 py-1 text-xs font-semibold rounded-full ${q.status === 'active' ? 'bg-[#5B4FE8]/10 text-[#5B4FE8] border border-[#5B4FE8]/20' : 'bg-amber-100 text-amber-600 border border-amber-200'}`}>
                     {q.status}
                   </span>
                 </div>
-                <div className="flex gap-6 mt-4 text-sm text-slate-400">
-                  <p>Priority: <span className="text-slate-200 font-mono">{q.priority}</span></p>
-                  <p>Concurrency: <span className="text-slate-200 font-mono">{q.concurrencyLimit ?? 0}</span></p>
-                  <p>Jobs Processed: <span className="text-slate-200 font-mono">{q.totalJobs ?? 0}</span></p>
+                <div className="flex gap-6 mt-4 text-sm text-slate-500">
+                  <p>Priority: <span className="text-slate-900 font-mono">{q.priority}</span></p>
+                  <p>Concurrency: <span className="text-slate-900 font-mono">{q.concurrencyLimit ?? 0}</span></p>
+                  <p>Jobs Processed: <span className="text-slate-900 font-mono">{q.totalJobs ?? 0}</span></p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <button 
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowModal(q.id); }}
-                  className="px-4 py-2 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 font-medium rounded-lg flex items-center gap-2 transition-colors border border-indigo-500/30"
+                  className="px-4 py-2 bg-[#FAFAF9] hover:bg-slate-100 text-[#5B4FE8] font-medium rounded-lg flex items-center gap-2 transition-colors border border-[#E7E5E4]"
                 >
                   <Plus size={18} /> New Job
                 </button>
                 
                 {q.status === 'active' ? (
-                  <button onClick={(e) => handleToggle(e, q.id, q.status)} className="p-2 rounded-lg bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 transition-colors border border-slate-700">
+                  <button onClick={(e) => handleToggle(e, q.id, q.status)} className="p-2 rounded-lg bg-white hover:bg-amber-50 hover:text-amber-600 text-slate-600 transition-colors border border-[#E7E5E4]">
                     <Pause size={20} />
                   </button>
                 ) : (
-                  <button onClick={(e) => handleToggle(e, q.id, q.status)} className="p-2 rounded-lg bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-slate-300 transition-colors border border-slate-700">
+                  <button onClick={(e) => handleToggle(e, q.id, q.status)} className="p-2 rounded-lg bg-white hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 transition-colors border border-[#E7E5E4]">
                     <Play size={20} />
                   </button>
                 )}
@@ -250,12 +250,12 @@ export default function QueuesPage() {
           </Link>
         ))}
         {queues.length === 0 && (
-          <div className="p-12 text-center border border-dashed border-white/10 rounded-xl bg-white/5 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-4">
+          <div className="p-12 text-center border border-dashed border-[#E7E5E4] rounded-xl bg-white flex flex-col items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-[#5B4FE8]/10 flex items-center justify-center text-[#5B4FE8] mb-4">
               <Plus size={32} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No Queues Found</h3>
-            <p className="text-slate-400 max-w-md">Create your first queue to start dispatching and processing jobs.</p>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No Queues Found</h3>
+            <p className="text-slate-500 max-w-md">Create your first queue to start dispatching and processing jobs.</p>
           </div>
         )}
       </div>
