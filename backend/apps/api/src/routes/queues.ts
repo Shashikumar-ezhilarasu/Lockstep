@@ -166,6 +166,8 @@ export default async function queueRoutes(app: FastifyInstance) {
       failureReason: schema.deadLetterQueue.failureReason,
       attemptsMade: schema.deadLetterQueue.attemptsMade,
       originalPayload: schema.deadLetterQueue.originalPayload,
+      aiSummary: schema.deadLetterQueue.aiSummary,
+      aiSummaryStatus: schema.deadLetterQueue.aiSummaryStatus,
       movedAt: schema.deadLetterQueue.movedAt,
     }).from(schema.deadLetterQueue)
       .innerJoin(schema.jobs, eq(schema.deadLetterQueue.jobId, schema.jobs.id))
@@ -235,6 +237,8 @@ export default async function queueRoutes(app: FastifyInstance) {
       failureReason: schema.deadLetterQueue.failureReason,
       attemptsMade: schema.deadLetterQueue.attemptsMade,
       originalPayload: schema.deadLetterQueue.originalPayload,
+      aiSummary: schema.deadLetterQueue.aiSummary,
+      aiSummaryStatus: schema.deadLetterQueue.aiSummaryStatus,
       movedAt: schema.deadLetterQueue.movedAt,
     }).from(schema.deadLetterQueue)
       .innerJoin(schema.jobs, eq(schema.deadLetterQueue.jobId, schema.jobs.id))
