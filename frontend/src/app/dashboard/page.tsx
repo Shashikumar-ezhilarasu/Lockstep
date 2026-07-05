@@ -1,9 +1,11 @@
 "use client"
 
+import { useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend } from 'recharts';
 import { motion, type Variants } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 
 const STATUS_COLORS: Record<string, string> = {
   queued: '#94a3b8',
@@ -17,7 +19,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function Home() {
-  const { data: metrics } = useQuery({
+  const { data: metrics, refetch } = useQuery({
     queryKey: ['metrics'],
     queryFn: async () => {
       const json = await api.getMetrics();
@@ -25,6 +27,16 @@ export default function Home() {
     },
     refetchInterval: 10000,
   });
+
+  useEffect(() => {
+    const sub = supabase.channel('dashboard-metrics')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'jobs' }, () => {
+        refetch();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(sub); };
+  }, [refetch]);
 
   if (!metrics) {
     return (
