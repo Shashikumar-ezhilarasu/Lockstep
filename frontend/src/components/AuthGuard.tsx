@@ -12,7 +12,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('lockstep_token');
     
-    if (!token && pathname !== '/login') {
+    if (!token && pathname !== '/login' && pathname !== '/') {
       router.replace('/login');
     } else {
       setIsAuthenticated(true);
@@ -26,8 +26,14 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     </div>;
   }
 
-  // If on login page, render without sidebar
-  if (pathname === '/login') {
+  // Only render sidebar on dashboard routes
+  const isDashboardRoute = pathname.startsWith('/dashboard') || 
+                           pathname.startsWith('/jobs') || 
+                           pathname.startsWith('/queues') || 
+                           pathname.startsWith('/workers') || 
+                           pathname.startsWith('/dlq');
+
+  if (!isDashboardRoute) {
     return <main className="flex-1 overflow-y-auto relative z-10 w-full">{children}</main>;
   }
 
