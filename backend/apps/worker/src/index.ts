@@ -5,6 +5,7 @@ import { claimJobs } from './claim';
 import pLimit from 'p-limit';
 import pino from 'pino';
 import { calculateRetryDelay } from './retry';
+import { generateFailureSummary } from './ai';
 import { eq } from 'drizzle-orm';
 
 const logger = pino({ name: 'worker' });
@@ -131,7 +132,22 @@ async function executeJob(job: any) {
         failureReason: error.message || 'Unknown error',
         attemptsMade: job.attempt,
         originalPayload: job.payload,
+        aiSummaryStatus: 'pending',
       }).onConflictDoNothing(); // just in case
+
+      generateFailureSummary(job, error, queueName, job.attempt)
+        .then(async (summary) => {
+          if (summary) {
+            await db.update(schema.deadLetterQueue)
+              .set({ aiSummary: summary, aiSummaryStatus: 'completed' })
+              .where(eq(schema.deadLetterQueue.jobId, job.id));
+          } else {
+            await db.update(schema.deadLetterQueue)
+              .set({ aiSummaryStatus: 'failed' })
+              .where(eq(schema.deadLetterQueue.jobId, job.id));
+          }
+        })
+        .catch(err => logger.error({ err }, 'AI summary generation failed'));
       await db.insert(schema.jobLogs).values({
         executionId,
         level: 'error',
