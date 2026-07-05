@@ -12,7 +12,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('lockstep_token');
     
-    if (!token && pathname !== '/login' && pathname !== '/') {
+    if (!token && pathname !== '/login' && pathname !== '/' && !pathname.startsWith('/docs')) {
       router.replace('/login');
     } else {
       setIsAuthenticated(true);
