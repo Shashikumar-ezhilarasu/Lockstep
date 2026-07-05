@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
+import Loader from './Loader';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -21,9 +22,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Don't render anything while checking authentication state to prevent flashes
   if (isAuthenticated === null) {
-    return <div className="h-screen w-full bg-slate-950 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-    </div>;
+    return <Loader fullScreen />;
   }
 
   // Only render sidebar on dashboard routes

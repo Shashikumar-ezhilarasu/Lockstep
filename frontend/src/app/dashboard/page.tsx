@@ -6,6 +6,7 @@ import { motion, type Variants } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
+import Loader from '@/components/Loader';
 import Link from 'next/link';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -40,11 +41,7 @@ export default function Home() {
   }, [refetch]);
 
   if (!metrics) {
-    return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5B4FE8]"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   const { 
