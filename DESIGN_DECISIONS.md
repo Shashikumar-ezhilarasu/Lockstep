@@ -54,3 +54,9 @@ To support massive scale, queue sharding should be implemented using a hash-base
 4. **Advisory Locks**: Advisory locks (used in `claim.ts` originally) are local to a single Postgres instance, so as long as all jobs for a queue live on the same physical shard, the concurrency limits and locking mechanism remain fully functional without distributed lock managers.
 
 By sharding on `project_id`, we ensure all queues, jobs, and limits for a single tenant stay co-located on the same shard, avoiding cross-shard transactions while easily distributing load across many tenants.
+
+## AI-Generated Dead Letter Queue Summaries
+- **Status:** Re-implemented (previously reverted)
+- **Context:** The system generates 1-2 sentence prose summaries using the Gemini API to explain why a job failed and what to do next.
+- **Decision:** The API call is implemented as a strict fire-and-forget, non-blocking promise immediately after the DLQ database insert. It includes a hard 8-second timeout and robust error catching.
+- **Why:** During an earlier iteration, the AI summary generation was inadvertently blocking the worker's main event loop and transaction path, leading to lock contention and queue stalls. By enforcing a fire-and-forget architecture with an initial `pending` database state, we guarantee that the core DLQ insert and job claiming logic are never impacted by AI generation failures, network timeouts, or missing API keys.
