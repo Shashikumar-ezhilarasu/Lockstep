@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { api } from '@/lib/api';
-import { RotateCw, Trash2, AlertTriangle } from 'lucide-react';
+import { RotateCw, Trash2, AlertTriangle, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
@@ -14,6 +14,8 @@ type DlqItem = {
   failureReason: string;
   attemptsMade: number;
   originalPayload: unknown;
+  aiSummary?: string | null;
+  aiSummaryStatus?: 'pending' | 'completed' | 'failed' | null;
   movedAt: string;
 };
 
@@ -109,6 +111,25 @@ export default function DLQPage() {
                 </div>
               </div>
               
+              {item.aiSummaryStatus === 'pending' && (
+                <div className="mt-6 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 flex items-center gap-3 text-indigo-500 font-medium text-sm animate-pulse">
+                  <Sparkles size={16} />
+                  Generating AI analysis...
+                </div>
+              )}
+
+              {item.aiSummaryStatus === 'completed' && item.aiSummary && (
+                <div className="mt-6 p-4 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] shadow-sm">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
+                    <Sparkles size={14} className="text-[#5B4FE8]" />
+                    AI Analysis
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {item.aiSummary}
+                  </p>
+                </div>
+              )}
+
               <div className="mt-6 p-4 bg-[#FAFAF9] rounded-xl border border-[#E7E5E4] overflow-x-auto">
                 <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-2">Original Payload</p>
                 <pre className="text-sm text-slate-700 font-mono">
