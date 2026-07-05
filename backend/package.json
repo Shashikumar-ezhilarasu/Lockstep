@@ -8,7 +8,7 @@
     "format": "prettier --write .",
     "test:db": "pnpm --filter db test",
     "build": "echo 'No build step required for backend'",
-    "start:all": "concurrently \"pnpm --filter api start\" \"pnpm --filter worker start\" \"pnpm --filter scheduler start\""
+    "start:all": "npx dotenv-cli -e .env -- concurrently \"pnpm --filter api start\" \"pnpm --filter worker start\" \"pnpm --filter scheduler start\""
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",
