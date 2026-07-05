@@ -10,6 +10,7 @@ The objective of this project is to provide a fully transparent, highly observab
 
 ### Authentication & Organizations
 - **Supabase Auth**: JWT-based session management.
+- **Default Login**: Environment-gated quick login for development/demo purposes (`NEXT_PUBLIC_ENABLE_DEFAULT_LOGIN`).
 - **Multi-tenant RBAC**: Strict logical isolation of resources by Organization and Project.
 - **Tenant Validation**: Pre-handler middleware validates JWT ownership over requested resources.
 
@@ -41,6 +42,7 @@ The objective of this project is to provide a fully transparent, highly observab
 
 ### Dead Letter Queue (DLQ)
 - **Automatic routing**: Jobs exceeding max attempts transition to DLQ.
+- **AI Failure Summaries**: Automatically generates actionable insights for job failures using the Gemini API without blocking the worker thread.
 - **Manual Intervention**: Requeue or delete capabilities from the dashboard.
 
 ### Dashboard & Observability
@@ -381,9 +383,11 @@ Uses Vitest for robust verification.
 1. **Environment Variables**:
 ```env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/postgres"
+GEMINI_API_KEY="your-gemini-api-key"
 NEXT_PUBLIC_API_URL="http://localhost:3001"
 NEXT_PUBLIC_SUPABASE_URL="..."
 NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
+NEXT_PUBLIC_ENABLE_DEFAULT_LOGIN="true"
 ```
 
 2. **Run Services**:
